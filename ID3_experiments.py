@@ -42,7 +42,14 @@ def find_best_pruning_m(train_dataset: np.array, m_choices, num_folds=5):
         #  or implement something else.
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        accuracy_for_m = []
+        kfolds = KFold(n_splits=num_folds, shuffle=True, random_state=316089952)
+        for train, val in create_train_validation_split(train_dataset, kfolds):
+            x_train, y_train, x_val, y_val = get_dataset_split(train, val, target_attribute)
+            model.fit(x_train, y_train)
+            y_val_pred = model.predict(x_val)
+            accuracy_for_m += [accuracy(y_val,y_val_pred)]
+        accuracies += [accuracy_for_m]
         # ========================
 
     best_m_idx = np.argmax([np.mean(acc) for acc in accuracies])
@@ -65,7 +72,7 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     acc = None
 
     # ====== YOUR CODE: ======
-    tree = ID3(label_names=attributes_names, min_for_pruning=10)
+    tree = ID3(label_names=attributes_names)
     tree.fit(x_train, y_train)
     y_pred = tree.predict(x_test)
     acc = accuracy(y_pred, y_test)
@@ -89,30 +96,16 @@ def cross_validation_experiment(plot_graph=True):
     #  - Fit the tree on the training data set.
     #  - Test the model on the test set (evaluate the accuracy) and print the result.
     attributes_names, train_dataset, test_dataset = load_data_set('ID3')
-    x_train, y_train, x_test, y_test = get_dataset_split(train_dataset, test_dataset, target_attribute)
 
     best_m = None
     accuracies = []
-    m_choices = [1, 10, 40, 120, 250]
+    m_choices = [20, 40, 80, 120, 250]
     num_folds = 5
 
     # ====== YOUR CODE: ======
     assert len(m_choices) >= 5, 'fill the m_choices list with  at least 5 different values for M.'
-    best_m = -1
-    current_max_acc = -math.inf
-    for m in m_choices:
-        kfolds = KFold(n_splits=num_folds, shuffle=True, random_state=316089952)
-        fold_acc = []
-        for train_index, test_index in kfolds.split(x_train):
-            X_train_fold, X_test_fold = x_train[train_index], x_train[test_index]
-            y_train_fold, y_test_fold = y_train[train_index], y_train[test_index]
-            tree = ID3(label_names=attributes_names, min_for_pruning=m)
-            tree.fit(X_train_fold, y_train_fold)
-            y_pred = tree.predict(X_test_fold)
-            acc = accuracy(y_pred, y_test_fold)
-            fold_acc += [acc]
-        if current_max_acc > np.mean(fold_acc):
-            best_m = m
+    best_m,accuracies = find_best_pruning_m(train_dataset,m_choices,num_folds)
+
     # ========================
     accuracies_mean = np.array([np.mean(acc) * 100 for acc in accuracies])
     if plot_graph:
@@ -145,7 +138,10 @@ def best_m_test(x_train, y_train, x_test, y_test, min_for_pruning):
     acc = None
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    tree = ID3(label_names=attributes_names, min_for_pruning=min_for_pruning)
+    tree.fit(x_train, y_train)
+    y_pred = tree.predict(x_test)
+    acc = accuracy(y_pred, y_test)
     # ========================
 
     return acc
@@ -161,7 +157,7 @@ if __name__ == '__main__':
     (*) To get the results in “informal” or nicely printable string representation of an object
         modify the call "utils.set_formatted_values(value=False)" from False to True and run it
     """
-    # formatted_print = True
+    formatted_print = True
     # basic_experiment(*data_split, formatted_print)
 
     """
