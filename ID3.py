@@ -125,7 +125,7 @@ class ID3:
                 gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, current_question,
                                                                                         current_uncertainty)
                 if gain >= best_gain:
-                    best_question=current_question
+                    best_question = current_question
                     best_gain, best_true_rows, best_true_labels, best_false_rows, best_false_labels = gain, true_rows, true_labels, false_rows, false_labels
 
         # ========================
@@ -148,8 +148,10 @@ class ID3:
         best_question = None
         true_branch, false_branch = None, None
         # ====== YOUR CODE: ======
-        if len(class_counts(rows,labels).keys()) == 1:
-            return Leaf(rows,labels)
+        if len(class_counts(rows, labels).keys()) == 1:
+            return Leaf(rows, labels)
+        if len(rows) <= self.min_for_pruning:
+            return Leaf(rows, labels)
         _, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = self.find_best_split(
             rows, labels)
         if len(best_true_rows) == len(rows) or len(best_false_rows) == len(rows):
@@ -188,7 +190,7 @@ class ID3:
         prediction = None
 
         # ====== YOUR CODE: ======
-        if isinstance(node, Leaf) :
+        if isinstance(node, Leaf):
             leaf: Leaf = node
             return max(leaf.predictions, key=leaf.predictions.get)
         question_result = node.question.match(row)

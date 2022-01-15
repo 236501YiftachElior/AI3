@@ -1,9 +1,12 @@
+import math
+
 from ID3 import ID3
 from utils import *
 
 """
 Make the imports of python packages needed
 """
+from sklearn.model_selection import KFold
 
 """
 ========================================================================
@@ -62,10 +65,10 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     acc = None
 
     # ====== YOUR CODE: ======
-    tree = ID3(['B','M'])
-    tree.fit(x_train,y_train)
+    tree = ID3(label_names=attributes_names, min_for_pruning=10)
+    tree.fit(x_train, y_train)
     y_pred = tree.predict(x_test)
-    acc = accuracy(y_pred,y_test)
+    acc = accuracy(y_pred, y_test)
     # ========================
 
     assert acc > 0.9, 'you should get an accuracy of at least 90% for the full ID3 decision tree'
@@ -85,16 +88,31 @@ def cross_validation_experiment(plot_graph=True):
     #  - Instate ID3 decision tree instance.
     #  - Fit the tree on the training data set.
     #  - Test the model on the test set (evaluate the accuracy) and print the result.
+    attributes_names, train_dataset, test_dataset = load_data_set('ID3')
+    x_train, y_train, x_test, y_test = get_dataset_split(train_dataset, test_dataset, target_attribute)
 
     best_m = None
     accuracies = []
-    m_choices = []
+    m_choices = [1, 10, 40, 120, 250]
     num_folds = 5
 
     # ====== YOUR CODE: ======
     assert len(m_choices) >= 5, 'fill the m_choices list with  at least 5 different values for M.'
-    raise NotImplementedError
-
+    best_m = -1
+    current_max_acc = -math.inf
+    for m in m_choices:
+        kfolds = KFold(n_splits=num_folds, shuffle=True, random_state=316089952)
+        fold_acc = []
+        for train_index, test_index in kfolds.split(x_train):
+            X_train_fold, X_test_fold = x_train[train_index], x_train[test_index]
+            y_train_fold, y_test_fold = y_train[train_index], y_train[test_index]
+            tree = ID3(label_names=attributes_names, min_for_pruning=m)
+            tree.fit(X_train_fold, y_train_fold)
+            y_pred = tree.predict(X_test_fold)
+            acc = accuracy(y_pred, y_test_fold)
+            fold_acc += [acc]
+        if current_max_acc > np.mean(fold_acc):
+            best_m = m
     # ========================
     accuracies_mean = np.array([np.mean(acc) * 100 for acc in accuracies])
     if plot_graph:
@@ -143,8 +161,8 @@ if __name__ == '__main__':
     (*) To get the results in “informal” or nicely printable string representation of an object
         modify the call "utils.set_formatted_values(value=False)" from False to True and run it
     """
-    formatted_print = True
-    basic_experiment(*data_split, formatted_print)
+    # formatted_print = True
+    # basic_experiment(*data_split, formatted_print)
 
     """
        cross validation experiment
