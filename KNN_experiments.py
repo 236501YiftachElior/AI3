@@ -1,4 +1,5 @@
 import subprocess
+import time
 
 from KNN import KNNClassifier
 from utils import *
@@ -66,14 +67,16 @@ if __name__ == '__main__':
                                                          target_attribute='Outcome')
 
     best_k = 51
-    b = 0
-
+    b = 5
+    # run_cross_validation()
     # # ========================================================================
 
     print("-" * 10 + f'k  = {best_k}' + "-" * 10)
     exp_print('KNN in raw data: ')
+    start = time.time()
     run_knn(best_k, x_train, y_train, x_test, y_test)
-
+    end=time.time()
+    print(f"took {end-start} seconds")
     top_m = get_top_b_features(x_train, y_train, b=b, k=best_k)
     x_train_new = x_train[:, top_m]
     x_test_test = x_test[:, top_m]

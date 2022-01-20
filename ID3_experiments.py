@@ -95,12 +95,13 @@ def cross_validation_experiment(plot_graph=True):
     #  - Instate ID3 decision tree instance.
     #  - Fit the tree on the training data set.
     #  - Test the model on the test set (evaluate the accuracy) and print the result.
-    attributes_names, train_dataset, test_dataset = load_data_set('ID3')
+    _, train_dataset, _ = load_data_set('ID3')
 
     best_m = None
     accuracies = []
-    m_choices = [20, 40, 80, 120, 250]
+    m_choices = [50, 60, 80, 120, 250]
     num_folds = 5
+
 
     # ====== YOUR CODE: ======
     assert len(m_choices) >= 5, 'fill the m_choices list with  at least 5 different values for M.'
@@ -158,7 +159,7 @@ if __name__ == '__main__':
         modify the call "utils.set_formatted_values(value=False)" from False to True and run it
     """
     formatted_print = True
-    # basic_experiment(*data_split, formatted_print)
+    basic_experiment(*data_split, formatted_print)
 
     """
        cross validation experiment

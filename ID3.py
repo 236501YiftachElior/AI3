@@ -124,10 +124,9 @@ class ID3:
                 current_question = Question(column, column_idx, value_split)
                 gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, current_question,
                                                                                         current_uncertainty)
-                if gain >= best_gain:
+                if gain > best_gain:
                     best_question = current_question
                     best_gain, best_true_rows, best_true_labels, best_false_rows, best_false_labels = gain, true_rows, true_labels, false_rows, false_labels
-
         # ========================
 
         return best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels
@@ -148,10 +147,12 @@ class ID3:
         best_question = None
         true_branch, false_branch = None, None
         # ====== YOUR CODE: ======
-        if len(class_counts(rows, labels).keys()) == 1:
-            return Leaf(rows, labels)
         if len(rows) <= self.min_for_pruning:
             return Leaf(rows, labels)
+
+        if len(class_counts(rows, labels).keys()) == 1:
+            return Leaf(rows, labels)
+
         _, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = self.find_best_split(
             rows, labels)
         if len(best_true_rows) == len(rows) or len(best_false_rows) == len(rows):
